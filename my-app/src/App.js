@@ -1,7 +1,12 @@
 import logo from './logo.svg';
+import bigabidLogo from './bigabid-logo.png'
 import './App.css';
 import { useState, useEffect } from 'react';
-import BasicTable from './Table'
+import BasicTable, {error, lose} from './Table'
+import BasicList from "./List";
+import { win } from './Table'
+import {IconButton, List, ListItem, ListItemText} from "@mui/material";
+
 
 function App() {
   const [campaigns, setCampaigns] = useState(null);
@@ -9,21 +14,6 @@ function App() {
   const [selected, setSelected] = useState(null);
   const [time, setTime] = useState(null);
   const [endTime, setEndTime] = useState(0);
-  const [win, setWin] = useState(0);
-  const columns = [
-    { title: "Bid Id", field: "id" },
-    { title: "Bid Time", field: "time" },
-    { title: "Price", field: "price" }
-  ]
-
-  function getBidInfo(bids) {
-    for (let i = 0; i < bids.length; i++) {
-      if (i % 2 !== 0) { // all bids are even and timestamps are odd
-        let date = convertTime(bids[i]);
-        console.log(date)
-      }
-    }
-  }
 
   const handleSelect = async (e) => {
     setSelected(e.target.value);
@@ -31,13 +21,6 @@ function App() {
       setTime(Math.round(new Date().getTime() / 1000));
       setEndTime(Math.round(new Date().getTime() / 1000) + 1);
     }
-  }
-
-  function convertTime(timestamp) {
-    //let unix_timestamp = 1549312452
-// Create a new JavaScript Date object based on the timestamp
-// multiplied by 1000 so that the argument is in milliseconds, not seconds.
-    return new Date(timestamp * 1000); //check its correct
   }
 
   useEffect(() => {
@@ -52,7 +35,6 @@ function App() {
   useEffect(() => {
     if (selected && selected === "Campaign") {
       setBids("");
-      setWin(0);
     }
     else if (selected && selected !== "Campaign") {
       //setBids("");
@@ -103,7 +85,13 @@ function App() {
   return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
+        {/*  image: {*/}
+        {/*  flex: 1,*/}
+        {/*  aspectRatio: 1.5,*/}
+        {/*  resizeMode: 'contain',*/}
+
+        {/*}*/}
+          <img src={bigabidLogo} />
           Bigabid Banker
           {campaigns && (
               <select className="campaigns" onChange={handleSelect} >
@@ -125,9 +113,9 @@ function App() {
             'align-self': 'flex-end',
             'margin-top': '-252px'}}>
             Resolved bids
-            <p>Wins</p>
-            <p>Loses</p>
-            <p>Errors</p>
+            <BasicList wins={win} loses={lose} errors={error}>
+
+            </BasicList>
           </div>
 
           <p>{ selected }</p>

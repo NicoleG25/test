@@ -69,7 +69,13 @@ function App() {
                     if (j.status === 0) {
                         allData += m;
                     }
-                    if (j.status === 1) {
+                    else if (j.status === 1) {
+                        setError(error + 1);
+                    }
+                    else if (j.status === 2) {
+                        setLose(lose + 1);
+                    }
+                    else {
                         setWin(win + 1);
                     }
                 }
