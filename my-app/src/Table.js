@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {useEffect, useState} from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -6,12 +7,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { useState, useEffect } from 'react';
 
 
-function createData(id, time, price) {
-    return { id, time, price };
-}
 export let win = 0;
 export let lose = 0;
 export let error = 0
@@ -27,23 +24,23 @@ function setErrors(value) {
 }
 
 function convertTime(timestamp) {
-    return new Date(timestamp * 1000); //check its correct
+    return new Date(timestamp * 1000);
 }
 
-export default function BasicTable({bids, selected, campaign}) {
+export function resetStats() {
+    win = 0;
+    error = 0;
+    lose = 0;
+}
+
+export default function BasicTable({bids, selected}) {
     const [table, setTable] = useState([]);
-    // const [win, setWin] = useState(0);
-    // const [error, setError] = useState(0);
-    // const [lose, setLose] = useState(0);
 
     async function getBidInfo(bids, campaign) {
-        win = 0;
-        lose = 0;
-        error = 0;
         const result = [];
         if (bids) {
             for (let i = 0; i < bids.length; i++) {
-                if (i % 2 !== 0) { // all bids are even and timestamps are odd
+                if ((i & 1) === 1) { // all bids are even and timestamps are odd
                     let date = convertTime(bids[i]);
                     let bidId = bids[i - 1];
                     let bidInfo = await getBid(bidId);
@@ -59,15 +56,12 @@ export default function BasicTable({bids, selected, campaign}) {
                             });
                         }
                         else if (bidInfoJson.status === 1) {
-                            // setError(error + 1);
                             setErrors(1);
                         }
                         else if (bidInfoJson.status === 2) {
-                            // setLose(lose + 1);
                             setLoses(1);
                         }
                         else {
-                            // setWin(win + 1);
                             setWins(1);
                         }
                     }
@@ -81,27 +75,24 @@ export default function BasicTable({bids, selected, campaign}) {
 
     async function getBid(bidId) {
         const response = await fetch("http://localhost:3001/bid/" + bidId);
-        const data = await response.json();
-        return data;
+        return await response.json();
     }
 
     useEffect(async () => {
         if (selected) {
-            //setTable(await getBidInfo(bids));
             console.log(bids);
-            //const j = await getBidInfo(bids);
             setTable(await getBidInfo(bids, selected));
             console.log(table);
         }
     }, [bids]);
 
     return (
-        <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 300 }} aria-label="simple table">
+        <TableContainer component={Paper} style={{maxHeight: '40vh'}}>
+            <Table stickyHeader sx={{ minWidth: 300, overflow: 'auto' }} aria-label="simple table">
                 <TableHead>
                     <TableRow>
                         <TableCell>Bid Id</TableCell>
-                        <TableCell align="right">Bid Time</TableCell>
+                        <TableCell align="center">Bid Time</TableCell>
                         <TableCell align="right">Price&nbsp;($)</TableCell>
                     </TableRow>
                 </TableHead>
