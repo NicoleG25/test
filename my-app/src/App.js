@@ -3,6 +3,7 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import BasicTable, {error, lose, win, resetStats} from './Table'
 import BasicList from "./List";
+import io from "socket.io-client";
 
 
 function App() {
@@ -11,50 +12,44 @@ function App() {
   const [selected, setSelected] = useState(null);
   const [time, setTime] = useState(null);
   const [endTime, setEndTime] = useState(0);
+  const [socket, setSocket] = useState(null);
+
+
+
+  useEffect(() => {
+    const newSocket = io(`http://${window.location.hostname}:3001`);
+    setSocket(newSocket);
+    newSocket.on("message", data => {
+      console.log(data);
+    });
+    newSocket.on("getCampaigns", async (data) => {
+      console.log(data);
+      setCampaigns(data);
+    });
+    return () => newSocket.close();
+  }, [setSocket]);
+
 
   const handleSelect = async (e) => {
     resetStats()
     setSelected(e.target.value);
+
     if (selected !== "Campaign") {
       setTime(Math.round(new Date().getTime() / 1000));
       setEndTime(Math.round(new Date().getTime() / 1000) + 1);
     }
   }
 
-  useEffect(() => {
-    getData();
-    async function getData() {
-      const response = await fetch("http://localhost:3001/list_of_campaigns");
-      const data = await response.json();
-      setCampaigns(data) ;
-    }
-  }, []);
 
   useEffect(() => {
-    if (selected && selected === "Campaign") {
-      setBids("");
+    if (selected) {
+      socket.emit("campaignSelected", { 'campaign': selected, 'timeSelected': time });
+      console.log("Sent campaign to server");
+      socket.once("getBids", async (data) => setBids(data));
+      const interval = setInterval(async () => setEndTime(endTime + 1), 1000);
+      return () => clearInterval(interval);
     }
-    else if (selected && selected !== "Campaign") {
-      const interval = setInterval(() => {
-        setEndTime(endTime + 1);
-        getBids(selected, time);
-      }, 1000);
-      return () => {
-        clearInterval(interval);
-      }
-    }
-  }, [selected, time, endTime]);
-
-  useEffect(() => {
-    if (endTime) {
-    }
-  }, [endTime]);
-
-  async function getBids(select, startTime) {
-    const response = await fetch("http://localhost:3001/list_of_bids?startTime=" + startTime + "&endTime=" + endTime);
-    const data = await response.json();
-    setBids(data);
-  }
+  }, [selected,  endTime]);
 
 
   return (

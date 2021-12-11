@@ -36,53 +36,40 @@ export function resetStats() {
 export default function BasicTable({bids, selected}) {
     const [table, setTable] = useState([]);
 
-    async function getBidInfo(bids, campaign) {
+    async function getBidInfo(bids) {
         const result = [];
-        if (bids) {
-            for (let i = 0; i < bids.length; i++) {
-                if ((i & 1) === 1) { // all bids are even and timestamps are odd
-                    let date = convertTime(bids[i]);
-                    let bidId = bids[i - 1];
-                    let bidInfo = await getBid(bidId);
-                    let bidInfoJson = JSON.parse(bidInfo);
-                    if (bidInfoJson.campaign === campaign) {
-                        if (bidInfoJson.status === 0) {
-                            result.push({
-                                id: bidId,
-                                time: date,
-                                price: bidInfoJson.price,
-                                campaign: bidInfoJson.campaign,
-                                status: bidInfoJson.status
-                            });
-                        }
-                        else if (bidInfoJson.status === 1) {
-                            setErrors(1);
-                        }
-                        else if (bidInfoJson.status === 2) {
-                            setLoses(1);
-                        }
-                        else {
-                            setWins(1);
-                        }
+        console.log(bids[0]);
+        setWins(0);
+        setLoses(0);
+        setErrors(0);
+        bids.forEach(bid => {
+            if (bid.status === 0) {
+                        result.push({
+                            id: bid.id,
+                            time: new Date(bid.date * 1000),
+                            price: bid.price,
+                            campaign: bid.campaign,
+                            status: bid.status
+                        });
+                    }
+                    else if (bid.status === 1) {
+                        setErrors(1);
+                    }
+                    else if (bid.status === 2) {
+                        setLoses(1);
+                    }
+                    else {
+                        setWins(1);
                     }
 
-                }
-            }
-        }
+        })
         return result;
 
     }
 
-    async function getBid(bidId) {
-        const response = await fetch("http://localhost:3001/bid/" + bidId);
-        return await response.json();
-    }
-
     useEffect(async () => {
         if (selected) {
-            console.log(bids);
             setTable(await getBidInfo(bids, selected));
-            console.log(table);
         }
     }, [bids]);
 
@@ -105,7 +92,7 @@ export default function BasicTable({bids, selected}) {
                             <TableCell component="th" scope="row">
                                 {row.id}
                             </TableCell>
-                            <TableCell align="right">{row.time.toString()}</TableCell>
+                            <TableCell align="right">{row.time.toLocaleString()}</TableCell>
                             <TableCell align="right">{row.price}</TableCell>
                         </TableRow>
                     ))}
