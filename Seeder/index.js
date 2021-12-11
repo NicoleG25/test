@@ -88,9 +88,7 @@ async function run (numberOfCampaigns, minBPS, maxBPS) {
       await redisClient.setAsync(bidId, JSON.stringify(bid));
       await redisClient.zaddAsync(REDIS_KEYS.LIST_OF_BIDS, now, bidId);
     });
-    console.log(bids);
     await resolveBids(now);
-
     await Promise.delay(moment.duration(1, 'second').asMilliseconds());
   }
 }

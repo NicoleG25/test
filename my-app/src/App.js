@@ -19,11 +19,7 @@ function App() {
   useEffect(() => {
     const newSocket = io(`http://${window.location.hostname}:3001`);
     setSocket(newSocket);
-    newSocket.on("message", data => {
-      console.log(data);
-    });
     newSocket.on("getCampaigns", async (data) => {
-      console.log(data);
       setCampaigns(data);
     });
     return () => newSocket.close();
@@ -44,7 +40,6 @@ function App() {
   useEffect(() => {
     if (selected) {
       socket.emit("campaignSelected", { 'campaign': selected, 'timeSelected': time });
-      console.log("Sent campaign to server");
       socket.once("getBids", async (data) => setBids(data));
       const interval = setInterval(async () => setEndTime(endTime + 1), 1000);
       return () => clearInterval(interval);

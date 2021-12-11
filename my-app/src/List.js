@@ -4,7 +4,6 @@ import {List, ListItem, ListItemText} from "@mui/material";
 export default function BasicList({wins, loses, errors}) {
 return (
     <List sx={{width: '100%', maxWidth: 360}}>
-        {/*{[1,2 , 3].map((value) => (*/}
         <ListItem key={1}>
             <ListItemText primary={`Wins ${wins}`}/>
         </ListItem>

@@ -23,11 +23,7 @@ io.on('connection', async (socket) => {
         if (!err) return replies;
     });
     await io.emit("getCampaigns", m);
-    socket.on("message", (data) => { console.log(data) });
-    socket.on("bla", (data) => console.log(data));
     socket.on("campaignSelected", async (data) => {
-        console.log("Campaign selected: " + data.campaign);
-        console.log("timeSelected: " + data.timeSelected);
         let currentSecond = data.timeSelected;
         const bids = await redisClient.zrangebyscore("LIST_OF_BIDS", currentSecond - 1, "+inf", 'withscores', function (err, replies) {
             if (!err) return replies;

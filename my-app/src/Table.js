@@ -38,7 +38,6 @@ export default function BasicTable({bids, selected}) {
 
     async function getBidInfo(bids) {
         const result = [];
-        console.log(bids[0]);
         setWins(0);
         setLoses(0);
         setErrors(0);
